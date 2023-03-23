@@ -1,5 +1,9 @@
-class Database {
+const databasePath = new URL('.', import.meta.url);
 
+export class Database {
+  #database = {};
+
+  constructor() {
+
+  }
 }
-
-export { Database };

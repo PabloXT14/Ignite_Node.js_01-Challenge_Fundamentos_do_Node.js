@@ -3,7 +3,7 @@ import { json } from './middlewares/json.js';
 import { routes } from './routes/index.js';
 import { extractQueryParams } from './utils/extract-query-params.js';
 
-const PORT = process.env.PORT || 3333;
+const PORT = 3333;
 
 const server = http.createServer(async (request, response) => {
   const { method, url } = request;
