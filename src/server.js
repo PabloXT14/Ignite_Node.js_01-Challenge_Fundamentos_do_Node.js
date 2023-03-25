@@ -26,7 +26,7 @@ const server = http.createServer(async (request, response) => {
     return route.handler(request, response);
   }
 
-  return response.writeHead(200).end('Hello World!');
+  return response.writeHead(404).end();
 });
 
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
