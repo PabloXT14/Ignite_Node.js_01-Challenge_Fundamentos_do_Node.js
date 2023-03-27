@@ -20,7 +20,7 @@ export class Database {
     fs.writeFile(databasePath, JSON.stringify(this.#database));
   }
 
-  insert(tableName, data = new Task) {
+  insert(tableName, data) {
     if (Array.isArray(this.#database[tableName])) {
       this.#database[tableName].push(data);
     } else {
@@ -47,11 +47,6 @@ export class Database {
   update(tableName, id, data) {
     const taskIndex = this.#database[tableName].findIndex(task => task.id === id);
 
-    const taskExists = taskIndex !== -1;
-
-    if (!taskExists)
-      throw new Error(`Task with id not found`);
-
     this.#database[tableName][taskIndex] = {
       ...this.#database[tableName][taskIndex],
       ...data,
@@ -64,23 +59,7 @@ export class Database {
   delete(tableName, id) {
     const taskIndex = this.#database[tableName].findIndex(task => task.id === id);
 
-    const taskExists = taskIndex !== -1;
-
-    if (!taskExists) throw new Error(`Task with id not found`);
-
     this.#database[tableName].splice(taskIndex, 1);
-
-    this.#persist();
-  }
-
-  complete(tableName, id) {
-    const taskIndex = this.#database[tableName].findIndex(task => task.id === id);
-
-    const taskExists = taskIndex !== -1;
-
-    if (!taskExists) throw new Error(`Task with id not found`);
-
-    this.#database[tableName][taskIndex].completed_at = new Date();
 
     this.#persist();
   }
