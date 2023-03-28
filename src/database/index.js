@@ -1,5 +1,4 @@
 import fs from 'node:fs/promises';
-import { Task } from '../models/Task.js';
 
 const databasePath = new URL('./db.json', import.meta.url);
 
@@ -36,12 +35,20 @@ export class Database {
     if (search) {
       data = data.filter(row => {
         return Object.entries(search).some(([key, value]) => {
+          if (!value) return true;
+
           return row[key].toLowerCase().includes(value.toLowerCase());
         });
       });
     }
 
     return data;
+  }
+
+  find(tableName, id) {
+    const task = this.#database[tableName].find(task => task.id === id);
+
+    return task;
   }
 
   update(tableName, id, data) {

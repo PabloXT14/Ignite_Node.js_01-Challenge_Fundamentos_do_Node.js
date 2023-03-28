@@ -56,7 +56,7 @@ export const tasksRoutes = [
       const { title, description } = request.body;
 
       try {
-        const [task] = database.select('tasks', { id });
+        const task = database.find('tasks', id);
 
         if (!task) throw new AppError('Task with id not found', 404);
 
@@ -89,7 +89,7 @@ export const tasksRoutes = [
       const { id } = request.params;
 
       try {
-        const [task] = database.select('tasks', { id });
+        const task = database.find('tasks', id);
 
         if (!task) throw new AppError('Task with id not found', 404);
 
@@ -115,7 +115,7 @@ export const tasksRoutes = [
       const { id } = request.params;
 
       try {
-        const [task] = database.select('tasks', { id });// desetruturando único item do array
+        const task = database.find('tasks', id);
 
         if (!task) throw new AppError('Task with id not found', 404);
 
