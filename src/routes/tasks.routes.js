@@ -136,5 +136,22 @@ export const tasksRoutes = [
 
       return response.writeHead(204).end();
     }
+  },
+  {
+    method: 'POST',
+    path: buildRoutePath('/tasks/import'),
+    handler: (request, response) => {
+      try {
+        
+      } catch (error) {
+        if (error instanceof AppError) {
+          return response.writeHead(error.statusCode).end(JSON.stringify({ error: error.message }));
+        }
+
+        return response.writeHead(500).end(
+          JSON.stringify({ error: error.message })
+        )
+      }
+    }
   }
 ]
