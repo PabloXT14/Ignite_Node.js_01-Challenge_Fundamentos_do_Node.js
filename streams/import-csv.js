@@ -1,8 +1,7 @@
 import { parse } from 'csv-parse';
 import fs from 'node:fs';
 
-const csvFilePath = new URL('./tasks-example.csv', import.meta.url);
-const csvFileReadStream = fs.createReadStream(csvFilePath);
+const csvFilePathTest = new URL('./tasks-example.csv', import.meta.url);
 
 const csvParse = parse({
   delimiter: ',',
@@ -10,28 +9,38 @@ const csvParse = parse({
   skip_empty_lines: true, // ignorar linhas vazias
 });
 
-async function createTasksOnDatabaseFromCSVFile() {
+async function createTasksOnDatabaseFromCSVFile(csvFilePath = '') {
+  const csvFileReadStream = fs.createReadStream(csvFilePath);
   const linesParse = csvFileReadStream.pipe(csvParse);
+
+  let tasks = []; 
 
   for await (const line of linesParse) {
     const { title, description } = line;
 
-    await fetch('http://localhost:3333/tasks', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        title,
-        description,
-      })
-    })
+    tasks.push({
+      title,
+      description
+    });
+
+    // await fetch('http://localhost:3333/tasks', {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //   },
+    //   body: JSON.stringify({
+    //     title,
+    //     description,
+    //   })
+    // })
   }
 
   console.log('CSV file successfully processed');
+
+  return tasks;
 }
 
-createTasksOnDatabaseFromCSVFile();
+createTasksOnDatabaseFromCSVFile(csvFilePathTest);
 
 // # Outra maneira de executar o csvParse
 // const data = [];
@@ -44,3 +53,5 @@ createTasksOnDatabaseFromCSVFile();
 //     console.log('CSV file successfully processed');
 //     console.log(data);
 //   });
+
+export { createTasksOnDatabaseFromCSVFile }

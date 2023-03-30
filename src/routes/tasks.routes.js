@@ -2,8 +2,11 @@ import { buildRoutePath } from "../utils/build-route-path.js";
 import { Database } from "../database/index.js";
 import { Task } from '../models/Task.js';
 import { AppError } from "../utils/AppError.js";
+import { storage } from "../multerConfig.js";
+import multer from "multer";
 
 const database = new Database();
+const uploadCSV = multer({ storage: storage });
 
 export const tasksRoutes = [
   {
@@ -140,18 +143,23 @@ export const tasksRoutes = [
   {
     method: 'POST',
     path: buildRoutePath('/tasks/import'),
-    handler: (request, response) => {
-      try {
-        
-      } catch (error) {
-        if (error instanceof AppError) {
-          return response.writeHead(error.statusCode).end(JSON.stringify({ error: error.message }));
+    handler: async (request, response) => {
+      const uploadHandler = uploadCSV.single('file');
+      uploadHandler(request, response, function (err) {
+        if (err instanceof multer.MulterError) {
+          // Ocorreu um erro do Multer durante o upload.
+          console.log('Erro do Multer:', err);
+          return response.writeHead(400).end('Erro ao fazer upload do arquivo.');
+        } else if (err) {
+          // Ocorreu outro erro durante o upload.
+          console.log('Erro geral:', err);
+          return response.writeHead(500).end('Erro ao fazer upload do arquivo.');
+        } else {
+          // O upload foi concluído com sucesso.
+          console.log('Upload realizado com sucesso!');
+          return response.writeHead(200).end('Arquivo enviado com sucesso!');
         }
-
-        return response.writeHead(500).end(
-          JSON.stringify({ error: error.message })
-        )
-      }
+      });
     }
   }
 ]
