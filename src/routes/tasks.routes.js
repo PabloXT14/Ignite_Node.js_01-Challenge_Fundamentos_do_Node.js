@@ -1,17 +1,19 @@
 import { buildRoutePath } from "../utils/build-route-path.js";
 import { Database } from "../database/index.js";
 import { Task } from '../models/Task.js';
+import { fileURLToPath } from "node:url";
 import { AppError } from "../utils/AppError.js";
 import { storage } from "../multerConfig.js";
 import multer from "multer";
+import { converteCSVToJS } from "../../streams/import-csv.js";
 
 const database = new Database();
-const uploadCSV = multer({ 
+const uploadCSV = multer({
   storage,
   limits: {
     fieldSize: 1024 * 1024 * 5,// 5MB (tamanho máximo permitido)
   }
- });
+});
 
 export const tasksRoutes = [
   {
@@ -149,14 +151,33 @@ export const tasksRoutes = [
     method: 'POST',
     path: buildRoutePath('/tasks/import'),
     handler: (request, response) => {
-      uploadCSV.single('file')(request, response, (error) => {
+      uploadCSV.single('file')(request, response, async (error) => {
         if (error) {
           console.log('Erro ao fazer upload do arquivo:', error);
-          return response.writeHead(500).end(JSON.stringify({ message: 'Erro ao fazer upload do arquivo' }));
-        } else {
-          console.log('Upload realizado com sucesso!');
-          return response.writeHead(200).end(JSON.stringify({ message: 'Upload realizado com sucesso!' }));
+          response.statusCode = 500;
+          response.end('Erro ao fazer upload do arquivo.');
         }
+
+        if (!request.file) {
+          console.log('Nenhum arquivo foi enviado!');
+          response.statusCode = 400;
+          response.end('Nenhum arquivo foi enviado!');
+        }
+
+        const csvFile = request.file;
+
+        const csvFileConverted = await converteCSVToJS(csvFile.path);
+
+        for (const task of csvFileConverted) {
+          const { title, description } = task;
+
+          const taskFormated = new Task(title, description);
+          database.insert('tasks', taskFormated);
+        }
+
+        console.log('Upload realizado com sucesso!');
+        response.statusCode = 200;
+        response.end('Arquivo enviado com sucesso!');
       });
     }
   }

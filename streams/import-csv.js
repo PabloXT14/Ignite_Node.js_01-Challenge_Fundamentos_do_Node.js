@@ -9,7 +9,7 @@ const csvParse = parse({
   skip_empty_lines: true, // ignorar linhas vazias
 });
 
-async function createTasksOnDatabaseFromCSVFile(csvFilePath = '') {
+async function converteCSVToJS(csvFilePath = '') {
   const csvFileReadStream = fs.createReadStream(csvFilePath);
   const linesParse = csvFileReadStream.pipe(csvParse);
 
@@ -22,17 +22,6 @@ async function createTasksOnDatabaseFromCSVFile(csvFilePath = '') {
       title,
       description
     });
-
-    // await fetch('http://localhost:3333/tasks', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   },
-    //   body: JSON.stringify({
-    //     title,
-    //     description,
-    //   })
-    // })
   }
 
   console.log('CSV file successfully processed');
@@ -40,7 +29,7 @@ async function createTasksOnDatabaseFromCSVFile(csvFilePath = '') {
   return tasks;
 }
 
-createTasksOnDatabaseFromCSVFile(csvFilePathTest);
+//converteCSVToJS(csvFilePathTest);
 
 // # Outra maneira de executar o csvParse
 // const data = [];
@@ -54,4 +43,4 @@ createTasksOnDatabaseFromCSVFile(csvFilePathTest);
 //     console.log(data);
 //   });
 
-export { createTasksOnDatabaseFromCSVFile }
+export { converteCSVToJS }

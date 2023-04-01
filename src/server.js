@@ -10,7 +10,13 @@ const server = http.createServer(async (request, response) => {
 
   request.url = decodeURIComponent(url);
 
-  await json(request, response);
+  const contentType = request.headers['content-type']
+   ? request.headers['content-type']
+   : null;
+
+  if (contentType === 'application/json') {
+    await json(request, response);
+  }
 
   const route = routes.find(route => {
     return route.method === method && route.path.test(url);
