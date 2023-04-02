@@ -1,7 +1,6 @@
 import { buildRoutePath } from "../utils/build-route-path.js";
 import { Database } from "../database/index.js";
 import { Task } from '../models/Task.js';
-import { fileURLToPath } from "node:url";
 import { AppError } from "../utils/AppError.js";
 import { storage } from "../multerConfig.js";
 import multer from "multer";
@@ -12,6 +11,13 @@ const uploadCSV = multer({
   storage,
   limits: {
     fieldSize: 1024 * 1024 * 5,// 5MB (tamanho máximo permitido)
+  },
+  fileFilter: (request, file, callback) => {
+    if (!file.originalname.match(/\.(csv)$/)) {
+      callback(new AppError('Only CSV files are allowed!', 404));
+    } else {
+      callback(null, true);
+    }
   }
 });
 
@@ -152,14 +158,17 @@ export const tasksRoutes = [
     path: buildRoutePath('/tasks/import'),
     handler: (request, response) => {
       uploadCSV.single('file')(request, response, async (error) => {
-        if (error) {
+        if (error instanceof AppError) {
+          return response.writeHead(error.statusCode).end(
+            JSON.stringify({ error: error.message })
+          );
+        } else if (error) {
           console.log('Erro ao fazer upload do arquivo:', error);
           response.statusCode = 500;
-          response.end('Erro ao fazer upload do arquivo.');
+          response.end(error.message);
         }
 
         if (!request.file) {
-          console.log('Nenhum arquivo foi enviado!');
           response.statusCode = 400;
           response.end('Nenhum arquivo foi enviado!');
         }

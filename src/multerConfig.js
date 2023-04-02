@@ -11,15 +11,10 @@ const storage = multer.diskStorage({
     callback(null, path.resolve(__dirname, 'uploads'));// o primeiro parâmetro de todo callback no multer indica erro a retonar
   },
   filename: (request, file, callback) => {// configuração de qual nome dar para o arquivo a ser salvo
-    const time = new Date().getDate();
+    const time = new Date().getTime();
 
     callback(null, `${time}_${file.originalname}`);
   },
-  fileFilter: (request, file, callback) => {
-    if (!file.originalname.match(/\.(csv)$/)) {
-      return callback(new AppError('Only CSV files are allowed!', 404));
-    }
-  }
 });
 
 export { storage }
