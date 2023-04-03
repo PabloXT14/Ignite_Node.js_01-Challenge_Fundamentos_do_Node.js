@@ -163,14 +163,15 @@ export const tasksRoutes = [
             JSON.stringify({ error: error.message })
           );
         } else if (error) {
-          console.log('Erro ao fazer upload do arquivo:', error);
-          response.statusCode = 500;
-          response.end(error.message);
+          console.log('Error uploading file:', error);
+          return response.writeHead(500).end(JSON.stringify({ error: error.message }));
         }
 
         if (!request.file) {
-          response.statusCode = 400;
-          response.end('Nenhum arquivo foi enviado!');
+          console.log('No files have been uploaded!');
+          return response.writeHead(400).end(
+            JSON.stringify({ error: 'No files have been uploaded!' })
+          );
         }
 
         const csvFile = request.file;
@@ -184,9 +185,9 @@ export const tasksRoutes = [
           database.insert('tasks', taskFormated);
         }
 
-        console.log('Upload realizado com sucesso!');
-        response.statusCode = 200;
-        response.end('Arquivo enviado com sucesso!');
+        return response.writeHead(201).end(
+          JSON.stringify({ message: 'File uploaded successfully!' })
+        );
       });
     }
   }

@@ -2,11 +2,14 @@ import http from 'node:http';
 import { json } from './middlewares/json.js';
 import { routes } from './routes/index.js';
 import { extractQueryParams } from './utils/extract-query-params.js';
+import { checkRequestsCount } from './middlewares/checkResquestCount.js';
 
 const PORT = 3333;
 
 const server = http.createServer(async (request, response) => {
   const { method, url } = request;
+
+  await checkRequestsCount(request, response);
 
   request.url = decodeURIComponent(url);
 
