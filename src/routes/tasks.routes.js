@@ -1,9 +1,10 @@
+import multer from "multer";
+import fs from "node:fs";
 import { buildRoutePath } from "../utils/build-route-path.js";
 import { Database } from "../database/index.js";
 import { Task } from '../models/Task.js';
 import { AppError } from "../utils/AppError.js";
 import { storage } from "../multerConfig.js";
-import multer from "multer";
 import { converteCSVToJS } from "../../streams/import-csv.js";
 
 const database = new Database();
@@ -18,7 +19,7 @@ const uploadCSV = multer({
     } else {
       callback(null, true);
     }
-  }
+  },
 });
 
 export const tasksRoutes = [
@@ -176,14 +177,18 @@ export const tasksRoutes = [
 
         const csvFile = request.file;
 
+        console.log(request.file.path);
+
         const csvFileConverted = await converteCSVToJS(csvFile.path);
 
         for (const task of csvFileConverted) {
           const { title, description } = task;
 
           const taskFormated = new Task(title, description);
-          database.insert('tasks', taskFormated);
+          await database.insert('tasks', taskFormated);
         }
+
+        fs.unlinkSync(csvFile.path);// apagando o arquivo depois de cadastrar os dados no banco
 
         return response.writeHead(201).end(
           JSON.stringify({ message: 'File uploaded successfully!' })

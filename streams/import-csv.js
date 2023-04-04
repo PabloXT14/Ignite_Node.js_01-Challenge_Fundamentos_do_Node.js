@@ -4,7 +4,7 @@ import fs from 'node:fs';
 const csvFilePathTest = new URL('./tasks-example.csv', import.meta.url);
 
 const csvParse = parse({
-  delimiter: ',',
+  delimiter: [',', ';'],
   columns: true, // indica que a primeira linha contém o cabeçalho das colunas
   skip_empty_lines: true, // ignorar linhas vazias
 });
