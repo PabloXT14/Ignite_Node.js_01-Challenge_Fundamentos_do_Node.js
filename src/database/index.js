@@ -15,8 +15,8 @@ export class Database {
       });
   }
 
-  #persist() {
-    fs.writeFile(databasePath, JSON.stringify(this.#database));
+  async #persist() {
+    await fs.writeFile(databasePath, JSON.stringify(this.#database));
   }
 
   insert(tableName, data) {

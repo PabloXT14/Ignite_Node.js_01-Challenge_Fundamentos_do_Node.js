@@ -5,13 +5,16 @@ const csvFilePathTest = new URL('./tasks-example.csv', import.meta.url);
 
 const csvParse = parse({
   delimiter: [',', ';'],
-  columns: true, // indica que a primeira linha contém o cabeçalho das colunas
-  skip_empty_lines: true, // ignorar linhas vazias
+  encoding: 'utf8', // codificação do arquivo
+  skipEmptyLines: true, // ignorar linhas vazias
+  columns: ['title', 'description'], // indica que a primeira linha contém o cabeçalho das colunas
+  fromLine: 2
 });
 
 async function converteCSVToJS(csvFilePath = '') {
   const csvFileReadStream = fs.createReadStream(csvFilePath);
   const linesParse = csvFileReadStream.pipe(csvParse);
+
 
   let tasks = []; 
 
@@ -26,6 +29,7 @@ async function converteCSVToJS(csvFilePath = '') {
 
   console.log('CSV file successfully processed');
 
+  csvParse.end(); // finalizando a stream de conversão com o csv parse 
   return tasks;
 }
 

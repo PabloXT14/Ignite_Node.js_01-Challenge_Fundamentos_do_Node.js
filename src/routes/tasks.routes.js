@@ -14,7 +14,7 @@ const uploadCSV = multer({
     fieldSize: 1024 * 1024 * 5,// 5MB (tamanho máximo permitido)
   },
   fileFilter: (request, file, callback) => {
-    if (!file.originalname.match(/\.(csv)$/)) {
+    if (file.mimetype !== 'text/csv') {
       callback(new AppError('Only CSV files are allowed!', 404));
     } else {
       callback(null, true);
@@ -177,15 +177,17 @@ export const tasksRoutes = [
 
         const csvFile = request.file;
 
-        console.log(request.file.path);
+        console.log('File from multer:', request.file);
 
         const csvFileConverted = await converteCSVToJS(csvFile.path);
 
-        for (const task of csvFileConverted) {
+        console.log('File converted to JS:', csvFileConverted);
+
+        for await (const task of csvFileConverted) {
           const { title, description } = task;
 
           const taskFormated = new Task(title, description);
-          await database.insert('tasks', taskFormated);
+          database.insert('tasks', taskFormated);
         }
 
         fs.unlinkSync(csvFile.path);// apagando o arquivo depois de cadastrar os dados no banco
