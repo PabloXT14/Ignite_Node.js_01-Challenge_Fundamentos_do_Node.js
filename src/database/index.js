@@ -21,7 +21,7 @@ export class Database {
 
   insert(tableName, data) {
     if (Array.isArray(this.#database[tableName])) {
-      this.#database[tableName].push(data);
+      this.#database[tableName].unshift(data);
     } else {
       this.#database[tableName] = [data];
     }

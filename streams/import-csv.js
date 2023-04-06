@@ -3,15 +3,16 @@ import fs from 'node:fs';
 
 const csvFilePathTest = new URL('./tasks-example.csv', import.meta.url);
 
-const csvParse = parse({
-  delimiter: [',', ';'],
-  encoding: 'utf8', // codificação do arquivo
-  skipEmptyLines: true, // ignorar linhas vazias
-  columns: ['title', 'description'], // indica que a primeira linha contém o cabeçalho das colunas
-  fromLine: 2
-});
-
 async function converteCSVToJS(csvFilePath = '') {
+  // criando config do csv-parse aqui para que seja possível converter um arquivo csv toda vez que a função for chamada
+  const csvParse = parse({
+    delimiter: [',', ';'],
+    encoding: 'utf8', // codificação do arquivo
+    skipEmptyLines: true, // ignorar linhas vazias
+    columns: ['title', 'description'], // indica que a primeira linha contém o cabeçalho das colunas
+    fromLine: 2
+  });
+
   const csvFileReadStream = fs.createReadStream(csvFilePath);
   const linesParse = csvFileReadStream.pipe(csvParse);
 

@@ -157,45 +157,62 @@ export const tasksRoutes = [
   {
     method: 'POST',
     path: buildRoutePath('/tasks/import'),
-    handler: (request, response) => {
-      uploadCSV.single('file')(request, response, async (error) => {
-        if (error instanceof AppError) {
-          return response.writeHead(error.statusCode).end(
-            JSON.stringify({ error: error.message })
-          );
-        } else if (error) {
-          console.log('Error uploading file:', error);
-          return response.writeHead(500).end(JSON.stringify({ error: error.message }));
-        }
+    handler: async (request, response) => {
+      try {
+        await new Promise((resolve, reject) => {
+          uploadCSV.single('file')(request, response, async (error) => { 
+            if (error instanceof AppError) {
+              console.log('Error uploading file:', error);
+              return reject(new AppError(error.message, error.statusCode));
+            }
 
-        if (!request.file) {
-          console.log('No files have been uploaded!');
-          return response.writeHead(400).end(
-            JSON.stringify({ error: 'No files have been uploaded!' })
-          );
-        }
+            if (error instanceof multer.MulterError) {
+              console.log('Error uploading file:', error);
+              return reject(new AppError(error.message, 500));
+            }
 
-        const csvFile = request.file;
-
-        console.log('File from multer:', request.file);
-
-        const csvFileConverted = await converteCSVToJS(csvFile.path);
-
-        console.log('File converted to JS:', csvFileConverted);
-
-        for await (const task of csvFileConverted) {
-          const { title, description } = task;
-
-          const taskFormated = new Task(title, description);
-          database.insert('tasks', taskFormated);
-        }
-
-        fs.unlinkSync(csvFile.path);// apagando o arquivo depois de cadastrar os dados no banco
+            if (error) {
+              console.log('Error uploading file:', error);
+              return reject(new AppError(error.message, 500));
+            }
+  
+            if (!request.file) {
+              console.log('No files have been uploaded!');
+              return reject(new AppError('No files have been uploaded!', 400));
+            }
+  
+            const csvFile = request.file;
+  
+            const csvFileConverted = await converteCSVToJS(csvFile.path);
+  
+            for await (const task of csvFileConverted) {
+              const { title, description } = task;
+  
+              const taskFormated = new Task(title, description);
+              database.insert('tasks', taskFormated);
+            }
+  
+            fs.unlinkSync(csvFile.path);// apagando o arquivo depois de cadastrar os dados no banco
+          
+            return resolve();// resolve a promise se tudo for bem sucedido
+          });
+        });
 
         return response.writeHead(201).end(
           JSON.stringify({ message: 'File uploaded successfully!' })
         );
-      });
+
+      } catch (error) {
+        if (error instanceof AppError) {
+          return response.writeHead(error.statusCode).end(
+            JSON.stringify({ error: error.message })
+          );
+        }
+
+        return response.writeHead(500).end(
+          JSON.stringify({ error: error.message })
+        )
+      }
     }
   }
 ]
