@@ -1,4 +1,4 @@
-const MAX_REQUESTS_PER_SECOND = 1;
+const MAX_REQUESTS_PER_SECOND = 2;
 const INTERVAL_DURATION_MS = 1000;
 const requestsCounts = new Map();
 

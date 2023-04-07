@@ -27,9 +27,9 @@ export const tasksRoutes = [
     method: 'POST',
     path: buildRoutePath('/tasks'),
     handler: (request, response) => {
-      const { title, description } = request.body;
-
       try {
+        const { title, description } = request.body;
+
         if (!title) throw new AppError('Title is required', 404);
         if (!description) throw new AppError('Description is required', 404);
 
@@ -69,10 +69,10 @@ export const tasksRoutes = [
     method: 'PUT',
     path: buildRoutePath('/tasks/:id'),
     handler: (request, response) => {
-      const { id } = request.params;
-      const { title, description } = request.body;
-
       try {
+        const { id } = request.params;
+        const { title, description } = request.body;
+
         const task = database.find('tasks', id);
 
         if (!task) throw new AppError('Task with id not found', 404);
@@ -103,9 +103,9 @@ export const tasksRoutes = [
     method: 'DELETE',
     path: buildRoutePath('/tasks/:id'),
     handler: (request, response) => {
-      const { id } = request.params;
-
       try {
+        const { id } = request.params;
+
         const task = database.find('tasks', id);
 
         if (!task) throw new AppError('Task with id not found', 404);
@@ -129,9 +129,9 @@ export const tasksRoutes = [
     method: 'PATCH',
     path: buildRoutePath('/tasks/:id/complete'),
     handler: (request, response) => {
-      const { id } = request.params;
-
       try {
+        const { id } = request.params;
+
         const task = database.find('tasks', id);
 
         if (!task) throw new AppError('Task with id not found', 404);
@@ -160,7 +160,7 @@ export const tasksRoutes = [
     handler: async (request, response) => {
       try {
         await new Promise((resolve, reject) => {
-          uploadCSV.single('file')(request, response, async (error) => { 
+          uploadCSV.single('file')(request, response, async (error) => {
             if (error instanceof AppError) {
               console.log('Error uploading file:', error);
               return reject(new AppError(error.message, error.statusCode));
@@ -175,25 +175,25 @@ export const tasksRoutes = [
               console.log('Error uploading file:', error);
               return reject(new AppError(error.message, 500));
             }
-  
+
             if (!request.file) {
               console.log('No files have been uploaded!');
               return reject(new AppError('No files have been uploaded!', 400));
             }
-  
+
             const csvFile = request.file;
-  
+
             const csvFileConverted = await converteCSVToJS(csvFile.path);
-  
+
             for await (const task of csvFileConverted) {
               const { title, description } = task;
-  
+
               const taskFormated = new Task(title, description);
               database.insert('tasks', taskFormated);
             }
-  
+
             fs.unlinkSync(csvFile.path);// apagando o arquivo depois de cadastrar os dados no banco
-          
+
             return resolve();// resolve a promise se tudo for bem sucedido
           });
         });
