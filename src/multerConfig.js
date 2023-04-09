@@ -1,10 +1,11 @@
-import { AppError } from './utils/AppError.js';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import multer from 'multer';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// const __dirname = path.dirname(__filename);
+const __dirname = new URL('.', import.meta.url).pathname;
+console.log(__dirname);
 
 const storage = multer.diskStorage({
   destination: (request, file, callback) => {// dizer para o multer onde salvar o arquivo
